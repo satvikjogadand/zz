@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Satvik Jogadand | Insurance & Risk Management Professional</title>
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.11.4/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.11.4/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow-x: hidden;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: white;
+            background-color: #121212;
+            cursor: default;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            outline: none;
+            z-index: 1;
+        }
+
+        /* Preloader */
+        .preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #121212;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 1s ease;
+        }
+
+        .preloader-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f0131e, #4285F4);
+            margin-bottom: 20px;
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(240, 19, 30, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(240, 19, 30, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(240, 19, 30, 0); }
+        }
+
+        .preloader-text {
+            font-size: 18px;
+            font-weight: 500;
+            margin-top: 20px;
+            opacity: 0.8;
+        }
+
+        .progress-bar {
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(to right, #f0131e, #4285F4);
+            transition: width 0.4s ease;
+        }
+
+        /* Main Container */
+        .container {
+            position: absolute;
+            z-index: 10;
+            width: 100%;
+            height: 100vh;
+            display: grid;
+            place-content: center;
+            opacity: 0;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 32px;
+            z-index: 20;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateY(-100%);
+        }
+
+        header.scrolled {
+            background-color: rgba(18, 18, 18, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+            padding: 20px 32px;
+        }
+
+        header.visible {
+            transform: translateY(0);
+        }
+
+        header .logo {
+            font-size: 24px;
+            font-weight: 700;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        header .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f0131e, #4285F4);
+            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        header .logo:hover .logo-circle {
+            transform: rotate(180deg);
+        }
+
+        header nav {
+            display: flex;
+            gap: 32px;
+        }
+
+        header nav a {
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        header nav a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: #4285F4;
+            transition: width 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+
+        header nav a:hover {
+            color: #4285F4;
+        }
+
+        header nav a:hover::after {
+            width: 100%;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 32px;
+            transform: translateY(50px);
+            opacity: 0;
+        }
+
+        h1 {
+            font-size: clamp(48px, 6vw, 72px);
+            font-weight: 800;
+            margin-bottom: 24px;
+            background: linear-gradient(to right, #f0131e, #4285F4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1.1;
+            position: relative;
+            display: inline-block;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 4px;
+            bottom: -10px;
+            left: 0;
+            background: linear-gradient(to right, #f0131e, #4285F4);
+            border-radius: 2px;
+        }
+
+        .subtitle {
+            font-size: clamp(18px, 2.5vw, 20px);
+            line-height: 1.6;
+            margin-bottom: 32px;
+            opacity: 0.8;
+            max-width: 600px;
+            transform: translateY(20px);
+            opacity: 0;
+        }
+
+        /* Button */
+        .btn {
+            display: inline-block;
+            padding: 16px 32px;
+            background: linear-gradient(45deg, #f0131e, #4285F4);
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 15px rgba(240, 19, 30, 0.3);
+            position: relative;
+            overflow: hidden;
+            transform: translateY(0);
+            opacity: 0;
+        }
+
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(240, 19, 30, 0.5);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.6s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #f0131e, #4285F4);
+            z-index: -1;
+            transition: all 0.4s ease;
+        }
+
+        .btn:hover::after {
+            filter: brightness(1.1);
+        }
+
+        /* Scroll Down */
+        .scroll-down {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 20;
+            cursor: pointer;
+            opacity: 0;
+        }
+
+        .scroll-down p {
+            margin-bottom: 8px;
+            font-size: 14px;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .scroll-down:hover p {
+            opacity: 1;
+        }
+
+        .scroll-down .arrow {
+            width: 20px;
+            height: 40px;
+            border: 2px solid white;
+            border-radius: 10px;
+            position: relative;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .scroll-down:hover .arrow {
+            opacity: 1;
+            border-color: #4285F4;
+        }
+
+        .scroll-down .arrow::after {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: white;
+            border-radius: 50%;
+            animation: scrollDown 1.5s infinite;
+            transition: background-color 0.3s ease;
+        }
+
+        .scroll-down:hover .arrow::after {
+            background-color: #4285F4;
+        }
+
+        @keyframes scrollDown {
+            0% { top: 8px; opacity: 0; }
+            50% { opacity: 1; }
+            100% { top: 20px; opacity: 0; }
+        }
+
+        /* Sections */
+        section {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            padding: 120px 32px;
+            background-color: #121212;
+            z-index: 15;
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        .section-title {
+            font-size: clamp(36px, 5vw, 48px);
+            font-weight: 700;
+            margin-bottom: 64px;
+            text-align: center;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 4px;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(to right, #f0131e, #4285F4);
+            border-radius: 2px;
+        }
+
+        /* Experience */
+        .experience-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .experience-card {
+            background: rgba(30, 30, 30, 0.7);
+            border-radius: 16px;
+            padding: 32px;
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: 1px solid rgba(66, 133, 244, 0.1);
+            backdrop-filter: blur(10px);
+            transform: translateY(20px);
+            opacity: 0;
+        }
+
+        .experience-card:hover {
+            transform: translateY(-10px) !important;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(66, 133, 244, 0.3);
+        }
+
+        .exp-title {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        .exp-company {
+            color: #4285F4;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .exp-duration {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .exp-duration::before {
+            content: '📅';
+        }
+
+        .exp-location {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .exp-location::before {
+            content: '📍';
+        }
+
+        /* Skills Grid */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .skill-category {
+            background: rgba(30, 30, 30, 0.7);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(66, 133, 244, 0.1);
+            backdrop-filter: blur(10px);
+            transform: translateY(20px);
+            opacity: 0;
+        }
+
+        .skill-category h3 {
+            color: #4285F4;
+            margin-bottom: 16px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .skill-item {
+            margin-bottom: 12px;
+        }
+
+        .skill-name {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 16px;
+        }
+
+        .skill-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .skill-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #f0131e, #4285F4);
+            border-radius: 3px;
+            width: 0;
+        }
+
+        /* Contact Form */
+        .contact-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .contact-method {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transform: translateX(-20px);
+            opacity: 0;
+        }
+
+        .contact-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f0131e, #4285F4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .contact-method:hover .contact-icon {
+            transform: rotate(15deg) scale(1.1);
+        }
+
+        .contact-text h4 {
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .contact-text p {
+            font-size: 16px;
+            opacity: 0.8;
+            margin: 0;
+        }
+
+        .contact-form {
+            background: rgba(30, 30, 30, 0.7);
+            border-radius: 16px;
+            padding: 32px;
+            border: 1px solid rgba(66, 133, 244, 0.1);
+            backdrop-filter: blur(10px);
+            transform: translateY(20px);
+            opacity: 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4285F4;
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #f0131e, #4285F4);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(240, 19, 30, 0.4);
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Footer */
+        footer {
+            position: relative;
+            padding: 40px 32px;
+            text-align: center;
+            background-color: rgba(18, 18, 18, 0.9);
+            z-index: 15;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .social-link {
+            color: white;
+            font-size: 24px;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: inline-block;
+            transform: translateY(20px);
+            opacity: 0;
+        }
+
+        .social-link:hover {
+            color: #4285F4;
+            transform: translateY(-5px) scale(1.2);
+        }
+
+        .copyright {
+            opacity: 0.7;
+            font-size: 14px;
+        }
+
+        /* Floating Particles */
+        .floating-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.3;
+        }
+
+        /* Mobile Menu */
+        .menu-toggle {
+            display: none;
+            width: 30px;
+            height: 20px;
+            position: relative;
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        .menu-toggle span {
+            display: block;
+            position: absolute;
+            height: 2px;
+            width: 100%;
+            background: white;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: .25s ease-in-out;
+        }
+
+        .menu-toggle span:nth-child(1) {
+            top: 0px;
+        }
+
+        .menu-toggle span:nth-child(2),
+        .menu-toggle span:nth-child(3) {
+            top: 10px;
+        }
+
+        .menu-toggle span:nth-child(4) {
+            top: 20px;
+        }
+
+        .menu-toggle.open span:nth-child(1) {
+            top: 10px;
+            width: 0%;
+            left: 50%;
+        }
+
+        .menu-toggle.open span:nth-child(2) {
+            transform: rotate(45deg);
+        }
+
+        .menu-toggle.open span:nth-child(3) {
+            transform: rotate(-45deg);
+        }
+
+        .menu-toggle.open span:nth-child(4) {
+            top: 10px;
+            width: 0%;
+            left: 50%;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                padding: 20px;
+            }
+
+            header.scrolled {
+                padding: 15px 20px;
+            }
+
+            header nav {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 70%;
+                height: 100vh;
+                background-color: rgba(18, 18, 18, 0.98);
+                backdrop-filter: blur(10px);
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 30px;
+                transition: right 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+            }
+
+            header nav.active {
+                right: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .main-content {
+                padding: 0 20px;
+            }
+
+            section {
+                padding: 80px 20px;
+            }
+
+            .experience-grid,
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Preloader -->
+    <div class="preloader" id="preloader">
+        <div class="preloader-logo"></div>
+        <div class="preloader-text">Loading Portfolio...</div>
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+    </div>
+
+    <!-- 3D Scene -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Floating Particles -->
+    <div class="floating-particles" id="floatingParticles"></div>
+
+    <!-- Main Content -->
+    <div class="container" id="mainContainer">
+        <header id="header">
+            <a href="#" class="logo">
+                <div class="logo-circle"></div>
+                SJ
+            </a>
+            <div class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <nav id="navMenu">
+                <a href="#about">About</a>
+                <a href="#experience">Experience</a>
+                <a href="#education">Education</a>
+                <a href="#contact">Contact</a>
+            </nav>
+        </header>
+
+        <div class="main-content" id="heroContent">
+            <h1 id="heroTitle">Satvik Jogadand</h1>
+            <p class="subtitle" id="heroSubtitle">PPO @ Bajaj Allianz | PGDM '25 – Insurance & Risk Management | IRM Level 1 | National Insurance Academy</p>
+            <a href="#about" class="btn" id="heroButton">Explore Portfolio</a>
+        </div>
+
+        <div class="scroll-down" id="scrollDown">
+            <p>Scroll Down</p>
+            <div class="arrow"></div>
+        </div>
+    </div>
+
+    <!-- About Section -->
+    <section id="about">
+        <h2 class="section-title">About Me</h2>
+        <div class="main-content">
+            <p class="subtitle">Insurance & Risk Management professional with expertise in management, leadership, and problem-solving. Currently pursuing PGDM at National Insurance Academy with a PPO from Bajaj Allianz.</p>
+            
+            <div class="skills-grid">
+                <div class="skill-category">
+                    <h3><i class="fas fa-user-tie"></i> Top Skills</h3>
+                    <div class="skill-item">
+                        <div class="skill-name">Management</div>
+                        <div class="skill-bar"><div class="skill-progress" style="width: 90%"></div></div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">Leadership</div>
+                        <div class="skill-bar"><div class="skill-progress" style="width: 85%"></div></div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">Problem Solving</div>
+                        <div class="skill-bar"><div class="skill-progress" style="width: 88%"></div></div>
+                    </div>
+                </div>
+                
+                <div class="skill-category">
+                    <h3><i class="fas fa-globe"></i> Languages</h3>
+                    <div class="skill-item">
+                        <div class="skill-name">English (Professional)</div>
+                        <div class="skill-bar"><div class="skill-progress" style="width: 90%"></div></div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">Hindi (Native)</div>
+                        <div class="skill-bar"><div class="skill-progress" style="width: 100%"></div></div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">Marathi (Elementary)</div>
+                        <div class="skill-bar"><div class="skill-progress" style="width: 70%"></div></div>
+                    </div>
+                </div>
+                
+                <div class="skill-category">
+                    <h3><i class="fas fa-certificate"></i> Certifications</h3>
+                    <div class="skill-item">
+                        <div class="skill-name">Managing Employee Performance</div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">AI For Everyone</div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">The hidden value – Lean</div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">Demystifying Life Insurance</div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">Digital Accessibility</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Section -->
+    <section id="experience">
+        <h2 class="section-title">Professional Experience</h2>
+        <div class="experience-grid">
+            <div class="experience-card">
+                <h3 class="exp-title">Summer Internship</h3>
+                <p class="exp-company">Bajaj Allianz General Insurance</p>
+                <p class="exp-duration">May 2024 - July 2024 (3 months)</p>
+                <p class="exp-location">India</p>
+                <p>Gained hands-on experience in insurance operations and risk management strategies at one of India's leading general insurance companies.</p>
+            </div>
+            <div class="experience-card">
+                <h3 class="exp-title">Student Volunteer</h3>
+                <p class="exp-company">The Climate Reality Project</p>
+                <p class="exp-duration">November 2019 - March 2020 (5 months)</p>
+                <p class="exp-location">Pune, Maharashtra, India</p>
+                <p>Contributed to environmental awareness campaigns and sustainability initiatives, helping to educate communities about climate change solutions.</p>
+            </div>
+            <div class="experience-card">
+                <h3 class="exp-title">Summer Internship</h3>
+                <p class="exp-company">UltraTech Cement</p>
+                <p class="exp-duration">April 2019 - May 2019 (2 months)</p>
+                <p class="exp-location">Madhya Pradesh, India</p>
+                <p>Learned about industrial operations and corporate management practices at India's largest cement company.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Education Section -->
+    <section id="education">
+        <h2 class="section-title">Education</h2>
+        <div class="experience-grid">
+            <div class="experience-card">
+                <h3 class="exp-title">PGDM, Insurance & Risk Management</h3>
+                <p class="exp-company">National Insurance Academy</p>
+                <p class="exp-duration">July 2023 - March 2025</p>
+                <p>Comprehensive program covering all aspects of insurance and risk management at India's premier insurance education institution.</p>
+            </div>
+            <div class="experience-card">
+                <h3 class="exp-title">BBA, HR & Finance</h3>
+                <p class="exp-company">Symbiosis Centre for Management Studies, Pune</p>
+                <p class="exp-duration">2018 - 2021</p>
+                <p>Specialized in Human Resources and Financial Management with a strong foundation in business administration.</p>
+            </div>
+            <div class="experience-card">
+                <h3 class="exp-title">IRM Level 1</h3>
+                <p class="exp-company">Institute of Risk Management</p>
+                <p class="exp-duration">March 2025</p>
+                <p>Professional certification in risk management principles and practices from the globally recognized Institute of Risk Management.</p>
+            </div>
+        </div>
+        
+        <h2 class="section-title" style="margin-top: 80px;">Publications</h2>
+        <div class="experience-card" style="max-width: 800px; margin: 0 auto;">
+            <h3 class="exp-title">EFFECTS OF DEMONETIZATION ON PREPAID INSTRUMENT INDIA</h3>
+            <p>Research paper analyzing the impact of India's demonetization policy on prepaid payment instruments and digital payment adoption.</p>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact">
+        <h2 class="section-title">Get In Touch</h2>
+        <div class="contact-container">
+            <div class="contact-info">
+                <div class="contact-method">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="contact-text">
+                        <h4>Email</h4>
+                        <p>satvikjogadand@gmail.com</p>
+                    </div>
+                </div>
+                <div class="contact-method">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="contact-text">
+                        <h4>Phone</h4>
+                        <p>+91 6261414868</p>
+                    </div>
+                </div>
+                <div class="contact-method">
+                    <div class="contact-icon">
+                        <i class="fab fa-linkedin-in"></i>
+                    </div>
+                    <div class="contact-text">
+                        <h4>LinkedIn</h4>
+                        <p>linkedin.com/in/satvikjogadand</p>
+                    </div>
+                </div>
+                <div class="contact-method">
+                    <div class="contact-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="contact-text">
+                        <h4>Location</h4>
+                        <p>Pune, Maharashtra, India</p>
+                    </div>
+                </div>
+            </div>
+            <form class="contact-form">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Send Message</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="footer">
+        <div class="social-links">
+            <a href="https://www.linkedin.com/in/satvikjogadand" class="social-link" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+            <a href="mailto:satvikjogadand@gmail.com" class="social-link"><i class="fas fa-envelope"></i></a>
+            <a href="tel:+916261414868" class="social-link"><i class="fas fa-phone"></i></a>
+        </div>
+        <p class="copyright">© 2024 Satvik Jogadand. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Preloader Animation
+        const preloader = document.getElementById('preloader');
+        const progress = document.getElementById('progress');
+        
+        // Simulate loading progress
+        let width = 0;
+        const interval = setInterval(() => {
+            width += Math.random() * 10;
+            progress.style.width = `${width}%`;
+            
+            if (width >= 100) {
+                clearInterval(interval);
+                setTimeout(() => {
+                    gsap.to(preloader, {
+                        opacity: 0,
+                        duration: 0.5,
+                        onComplete: () => {
+                            preloader.style.display = 'none';
+                            initPortfolio();
+                        }
+                    });
+                }, 500);
+            }
+        }, 100);
+
+        function initPortfolio() {
+            // Three.js Scene Setup
+            const canvas = document.querySelector('#canvas');
+            const scene = new THREE.Scene();
+            
+            // Camera
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+            
+            // Renderer
+            const renderer = new THREE.WebGLRenderer({
+                canvas,
+                antialias: true,
+                alpha: true
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            
+            // Particles
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particleCount = 2000;
+            
+            const posArray = new Float32Array(particleCount * 3);
+            const colorArray = new Float32Array(particleCount * 3);
+            const sizeArray = new Float32Array(particleCount);
+            
+            for(let i = 0; i < particleCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 10;
+                colorArray[i] = Math.random();
+            }
+            
+            for(let i = 0; i < particleCount; i++) {
+                sizeArray[i] = Math.random() * 0.03 + 0.01;
+            }
+            
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+            particlesGeometry.setAttribute('size', new THREE.BufferAttribute(sizeArray, 1));
+            
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.02,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true
+            });
+            
+            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particlesMesh);
+            
+            // Torus Knot (Main 3D Object)
+            const torusGeometry = new THREE.TorusKnotGeometry(1, 0.4, 100, 16);
+            const torusMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0xf0131e,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.7
+            });
+            const torus = new THREE.Mesh(torusGeometry, torusMaterial);
+            scene.add(torus);
+            
+            // Animation Loop
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                torus.rotation.x += 0.005;
+                torus.rotation.y += 0.005;
+                
+                particlesMesh.rotation.x += 0.0005;
+                particlesMesh.rotation.y += 0.0005;
+                
+                renderer.render(scene, camera);
+            }
+            animate();
+            
+            // Window Resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+            
+            // Create floating particles
+            const floatingParticles = document.getElementById('floatingParticles');
+            const particleCount2 = 30;
+            
+            for (let i = 0; i < particleCount2; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random properties
+                const size = Math.random() * 5 + 2;
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                const delay = Math.random() * 5;
+                const duration = Math.random() * 10 + 10;
+                const opacity = Math.random() * 0.3 + 0.1;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${posX}%`;
+                particle.style.top = `${posY}%`;
+                particle.style.opacity = opacity;
+                particle.style.animation = `float ${duration}s ease-in-out ${delay}s infinite`;
+                
+                floatingParticles.appendChild(particle);
+            }
+            
+            // Add floating animation
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes float {
+                    0% { transform: translateY(0) translateX(0); }
+                    50% { transform: translateY(-50px) translateX(20px); }
+                    100% { transform: translateY(0) translateX(0); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // GSAP Animations
+            gsap.registerPlugin(ScrollTrigger);
+            
+            // Main content animation
+            gsap.to("#mainContainer", { opacity: 1, duration: 1 });
+            
+            // Hero content animations
+            const heroTL = gsap.timeline();
+            heroTL
+                .from("#heroTitle", { 
+                    y: 50, 
+                    opacity: 0, 
+                    duration: 1, 
+                    ease: "power3.out" 
+                })
+                .from("#heroTitle::after", { 
+                    width: 0, 
+                    duration: 1.5, 
+                    ease: "power4.out" 
+                }, "-=1")
+                .from("#heroSubtitle", { 
+                    y: 20, 
+                    opacity: 0, 
+                    duration: 1, 
+                    ease: "power3.out" 
+                }, "-=1.2")
+                .from("#heroButton", { 
+                    y: 20, 
+                    opacity: 0, 
+                    duration: 1, 
+                    ease: "power3.out" 
+                }, "-=0.8")
+                .from("#scrollDown", { 
+                    y: 20, 
+                    opacity: 0, 
+                    duration: 1, 
+                    ease: "power3.out" 
+                }, "-=0.8")
+                .from("#header", { 
+                    y: -100, 
+                    duration: 1, 
+                    ease: "power3.out",
+                    onComplete: () => {
+                        document.getElementById('header').classList.add('visible');
+                    }
+                }, "-=1.5");
+            
+            // Header scroll effect
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    document.getElementById('header').classList.add('scrolled');
+                    document.getElementById('scrollDown').style.opacity = '0';
+                } else {
+                    document.getElementById('header').classList.remove('scrolled');
+                    document.getElementById('scrollDown').style.opacity = '1';
+                }
+            });
+            
+            // Section animations
+            gsap.utils.toArray("section").forEach(section => {
+                gsap.from(section, {
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top 70%",
+                        toggleActions: "play none none none"
+                    },
+                    y: 50,
+                    opacity: 0,
+                    duration: 1,
+                    ease: "power3.out"
+                });
+                
+                // Section title animation
+                gsap.from(section.querySelector(".section-title::after"), {
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top 70%",
+                        toggleActions: "play none none none"
+                    },
+                    width: 0,
+                    duration: 1.5,
+                    ease: "power4.out"
+                });
+                
+                // Content animations
+                if (section.id === "about") {
+                    gsap.utils.toArray(".skill-category").forEach((card, i) => {
+                        gsap.from(card, {
+                            scrollTrigger: {
+                                trigger: section,
+                                start: "top 70%",
+                                toggleActions: "play none none none"
+                            },
+                            y: 20,
+                            opacity: 0,
+                            duration: 1,
+                            delay: i * 0.2,
+                            ease: "power3.out"
+                        });
+                    });
+                    
+                    // Animate skill bars
+                    gsap.utils.toArray(".skill-progress").forEach(bar => {
+                        gsap.from(bar, {
+                            scrollTrigger: {
+                                trigger: bar,
+                                start: "top 80%",
+                                toggleActions: "play none none none"
+                            },
+                            width: 0,
+                            duration: 1.5,
+                            ease: "power4.out"
+                        });
+                    });
+                }
+                
+                if (section.id === "experience" || section.id === "education") {
+                    gsap.utils.toArray(".experience-card").forEach((card, i) => {
+                        gsap.from(card, {
+                            scrollTrigger: {
+                                trigger: section,
+                                start: "top 70%",
+                                toggleActions: "play none none none"
+                            },
+                            y: 20,
+                            opacity: 0,
+                            duration: 1,
+                            delay: i * 0.2,
+                            ease: "power3.out"
+                        });
+                    });
+                }
+                
+                if (section.id === "contact") {
+                    gsap.utils.toArray(".contact-method").forEach((method, i) => {
+                        gsap.from(method, {
+                            scrollTrigger: {
+                                trigger: section,
+                                start: "top 70%",
+                                toggleActions: "play none none none"
+                            },
+                            x: -20,
+                            opacity: 0,
+                            duration: 1,
+                            delay: i * 0.2,
+                            ease: "power3.out"
+                        });
+                    });
+                    
+                    gsap.from(".contact-form", {
+                        scrollTrigger: {
+                            trigger: section,
+                            start: "top 70%",
+                            toggleActions: "play none none none"
+                        },
+                        y: 20,
+                        opacity: 0,
+                        duration: 1,
+                        delay: 0.4,
+                        ease: "power3.out"
+                    });
+                }
+            });
+            
+            // Footer animation
+            gsap.from("#footer", {
+                scrollTrigger: {
+                    trigger: "#footer",
+                    start: "top 80%",
+                    toggleActions: "play none none none"
+                },
+                y: 20,
+                opacity: 0,
+                duration: 1,
+                ease: "power3.out"
+            });
+            
+            gsap.utils.toArray(".social-link").forEach((link, i) => {
+                gsap.from(link, {
+                    scrollTrigger: {
+                        trigger: "#footer",
+                        start: "top 80%",
+                        toggleActions: "play none none none"
+                    },
+                    y: 20,
+                    opacity: 0,
+                    duration: 0.5,
+                    delay: i * 0.1,
+                    ease: "power3.out"
+                });
+            });
+            
+            // 3D object parallax effect
+            window.addEventListener('scroll', () => {
+                const scrollY = window.scrollY;
+                
+                // Parallax effect on 3D objects
+                torus.rotation.x = scrollY / 1000;
+                torus.rotation.y = scrollY / 1000;
+                torus.position.y = -scrollY / 500;
+                
+                particlesMesh.rotation.x = scrollY / 2000;
+                particlesMesh.rotation.y = scrollY / 2000;
+            });
+            
+            // Mobile Menu Toggle
+            const menuToggle = document.getElementById('menuToggle');
+            const navMenu = document.getElementById('navMenu');
+            
+            menuToggle.addEventListener('click', () => {
+                menuToggle.classList.toggle('open');
+                navMenu.classList.toggle('active');
+            });
+            
+            // Close menu when clicking on a link
+            document.querySelectorAll('#navMenu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    menuToggle.classList.remove('open');
+                    navMenu.classList.remove('active');
+                });
+            });
+            
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // Scroll down button
+            document.getElementById('scrollDown').addEventListener('click', () => {
+                window.scrollTo({
+                    top: window.innerHeight,
+                    behavior: 'smooth'
+                });
+            });
+            
+            // Form submission
+            const contactForm = document.querySelector('.contact-form');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    alert('Thank you for your message! I will get back to you soon.');
+                    this.reset();
+                });
+            }
+        }
+    </script>
+</body>
+</html>
